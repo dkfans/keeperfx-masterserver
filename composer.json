@@ -1,0 +1,22 @@
+{
+    "name": "yani/keeperfx-masterserver",
+    "description": "KeeperFX Masterserver",
+    "type": "project",
+    "license": "GNU",
+    "autoload": {
+        "psr-4": {
+            "KeeperFX\\MasterServer\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Yani",
+            "email": "yani@protonmail.com"
+        }
+    ],
+    "require": {
+        "react/socket": "^1.13.0",
+        "ramsey/uuid": "^4.7",
+        "xenokore/utility": "^2.0"
+    }
+}
