@@ -113,6 +113,12 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
                 $host_player_name = $packet->data['player_name'];
             }
 
+            // Get lobby name
+            $lobby_name = $host_player_name . "'s Lobby";
+            if(isset($packet->data['name']) && \is_string($packet->data['name'])) {
+                $lobby_name = $packet->data['name'];
+            }
+
             // Create player object
             $host_player = new Player(
                 name:  $host_player_name,
@@ -125,9 +131,6 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
             if(isset($packet->data['port']) && \is_numeric($packet->data['port'])) {
                 $port = (int) $packet->data['port'];
             }
-
-            // Get lobby name
-            $lobby_name = $host_player_name . "'s Lobby";
             
             // Create lobby
             $lobby = LobbyList::createLobby($lobby_name, $ip, $port, [$host_player]);
