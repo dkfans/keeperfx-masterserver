@@ -27,26 +27,32 @@ use React\EventLoop\Loop;
 // Load libraries
 require __DIR__ . '/vendor/autoload.php';
 
-// Show startup message
-echo '[+] KeeperFX MasterServer'. PHP_EOL;
-echo '[+] Protocol version: '. PROTOCOL_VERSION . PHP_EOL;
-
 // Get IP from command line options
 $ip   = $argv[1] ?? '127.0.0.1';
 $port = $argv[2] ?? '0';
 $listen_address = $ip . ':' . $port;
 
+// Check last argument
+$last_arg = $argv[3] ?? null;
+if($last_arg && $last_arg === '-v'){
+    Console::setVerbose(true);
+}
+
+// Show startup message
+Console::printLine(true, 'KeeperFX MasterServer', false);
+Console::printLine(true, 'Protocol version: '. PROTOCOL_VERSION, true);
+
 // Create the socket server
 $socket = new React\Socket\SocketServer($listen_address, []);
 if(!$socket){
-    echo '[-] Failed to setup masterserver'. PHP_EOL;
+    Console::printLine(false, 'Failed to setup masterserver');
     return 0;
 }
 
 // Handle a connection
 $socket->on('connection', function (React\Socket\ConnectionInterface $connection) use ($socket) {
 
-    Console::printConnLine($connection, 'connected!');
+    Console::printConnLine($connection, 'connected!', true);
 
     // Send a "keeperfx=true" packet.
     // This does 2 things:
@@ -68,12 +74,12 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
 
         } catch (PacketInvalidJsonException $ex) {
             $connection->write(ResponsePacket::createError('INVALID_JSON'));
-            Console::printConnLine($connection, 'unable to JSON decode the packet');
+            Console::printConnLine($connection, 'unable to JSON decode the packet', true);
             return;
 
         } catch (PacketNoMethodException $ex) {
             $connection->write(ResponsePacket::createError('NO_METHOD'));
-            Console::printConnLine($connection, 'missing method');
+            Console::printConnLine($connection, 'missing method', true);
             return;
         }
 
@@ -81,7 +87,7 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
         $stale_lobby_tokens = LobbyList::removeStaleLobbies();
         $stale_lobbies_count = \count($stale_lobby_tokens);
         if($stale_lobbies_count > 0){
-            Console::printLine(true, (($stale_lobbies_count === 1) ? 'lobby' : 'lobbies') . " became stale: "  . \implode(', ', $stale_lobby_tokens));
+            Console::printLine(true, (($stale_lobbies_count === 1) ? 'lobby' : 'lobbies') . " became stale: "  . \implode(', ', $stale_lobby_tokens), false);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +133,7 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
             $lobby = LobbyList::createLobby($lobby_name, $ip, $port, [$host_player]);
 
             $connection->write(ResponsePacket::create(['token' => $lobby->token]));
-            Console::printConnLine($connection, "created lobby for [{$host_player_name}] -> {$lobby_name}");
+            Console::printConnLine($connection, "created lobby for [{$host_player_name}] -> {$lobby_name}", false);
             return;
         }
 
@@ -139,7 +145,7 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
 
             $connection->write(ResponsePacket::create(['lobbies' => $lobby_data]));
 
-            Console::printConnLine($connection, "asked for lobby list -> {$lobby_count} lobbies returned");
+            Console::printConnLine($connection, "asked for lobby list -> {$lobby_count} lobbies returned", true);
             return;
         }
 
@@ -164,14 +170,14 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
 
             // Make sure token is valid
             if(!is_string($packet->data['token'])) {
-                Console::printConnLine($connection, "invalid token");
+                Console::printConnLine($connection, "invalid token", false);
                 $connection->write(ResponsePacket::createError('INVALID_LOBBY_TOKEN'));
                 return;
             }
 
             // Make sure token exists
             if(!isset(LobbyList::$lobbies[$packet->data['token']])) {
-                Console::printConnLine($connection, "tried to interact with non existing lobby: {$packet->data['token']}");
+                Console::printConnLine($connection, "tried to interact with non existing lobby: {$packet->data['token']}", false);
                 $connection->write(ResponsePacket::createError('LOBBY_NOT_FOUND'));
                 return;
             }
@@ -194,7 +200,7 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
                     // Get status enum or fail
                     $status = LobbyStatus::tryFrom($packet->data['status']);
                     if(!$status){
-                        Console::printConnLine($connection, "invalid status: {$packet->data['status']}");
+                        Console::printConnLine($connection, "invalid status: {$packet->data['status']}", false);
                         $connection->write(ResponsePacket::createError('INVALID_LOBBY_STATUS'));
                         return;
                     }
@@ -258,7 +264,7 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
             if($packet->method === 'keepalive_lobby'){
                 $lobby->timestamp = new \DateTime('now');
                 $connection->write(ResponsePacket::createSuccess());
-                Console::printConnLine($connection, "keepalive for lobby: {$lobby->token}");
+                Console::printConnLine($connection, "keepalive for lobby: {$lobby->token}", true);
                 return;
             }
 
@@ -274,20 +280,20 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
 
     // Handle closing of socket between server and client
     $connection->on('close', function () use ($connection, $socket, &$client, &$master_server) {
-        Console::printConnLine($connection, 'connection closed');
+        Console::printConnLine($connection, 'connection closed', true);
     });
 
     // Handle error between server and client
     $connection->on('error', function (Exception $e) use ($connection) {
-        Console::printConnLine($connection, 'ERROR: ' . $e->getMessage());
+        Console::printConnLine($connection, 'ERROR: ' . $e->getMessage(), false);
     });
 
 });
 
 // Handle socket error
 $socket->on('error', function (Exception $e) {
-    echo "[-] SOCKET ERROR: {$e->getMessage()}" . PHP_EOL;
+    Console::printLine(false, "SOCKET ERROR: {$e->getMessage()}", false);
 });
 
 // Show nice message that our server is now running
-echo '[+] Listening on: ' . $socket->getAddress() . PHP_EOL;
+Console::printLine(true, "Listening on: {$socket->getAddress()}", false);
