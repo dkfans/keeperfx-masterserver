@@ -132,6 +132,9 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
                 $port = (int) $packet->data['port'];
             }
 
+            // Is password protected?
+            $has_password = false;
+
             // Get game version
             $game_version = null;
             if(isset($packet->data['game_version']) && \is_string($packet->data['game_version'])) {
@@ -139,7 +142,7 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
             }
             
             // Create lobby
-            $lobby = LobbyList::createLobby($lobby_name, $ip, $port, [$host_player], false, $game_version);
+            $lobby = LobbyList::createLobby($lobby_name, $ip, $port, [$host_player], $has_password, $game_version);
 
             $connection->write(ResponsePacket::create(['token' => $lobby->token]));
             Console::printConnLine($connection, "created lobby for [{$host_player_name}] -> {$lobby_name}", false);
