@@ -131,9 +131,15 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
             if(isset($packet->data['port']) && \is_numeric($packet->data['port'])) {
                 $port = (int) $packet->data['port'];
             }
+
+            // Get game version
+            $game_version = null;
+            if(isset($packet->data['game_version']) && \is_string($packet->data['game_version'])) {
+                $game_version = $packet->data['game_version'];
+            }
             
             // Create lobby
-            $lobby = LobbyList::createLobby($lobby_name, $ip, $port, [$host_player]);
+            $lobby = LobbyList::createLobby($lobby_name, $ip, $port, [$host_player], false, $game_version);
 
             $connection->write(ResponsePacket::create(['token' => $lobby->token]));
             Console::printConnLine($connection, "created lobby for [{$host_player_name}] -> {$lobby_name}", false);
