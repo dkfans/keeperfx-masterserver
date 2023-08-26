@@ -22,6 +22,7 @@ class LobbyList {
                 'players'      => (array)  $lobby->players,
                 'status'       => (string) $lobby->status->value,
                 'has_password' => (bool)   $lobby->has_password,
+                'game_version' => (string) $lobby->game_version,
             ];
         }
 
@@ -43,6 +44,7 @@ class LobbyList {
         string $port,
         array $players = [],
         bool $has_password = false,
+        ?string $game_version = null,
     ): Lobby
     {
         $lobby = new Lobby(
@@ -52,7 +54,8 @@ class LobbyList {
             token       : self::generateUniqueLobbyToken(),
             players     : $players,
             status      : LobbyStatus::OPEN,
-            has_password: $has_password
+            has_password: $has_password,
+            game_version: $game_version
         );
 
         self::$lobbies[$lobby->token] = $lobby;

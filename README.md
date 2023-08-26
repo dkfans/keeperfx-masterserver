@@ -1,7 +1,7 @@
 KeeperFX MasterServer
 =====================
 
-This is the KeeperFX masterserver that will handle and serve a list of online multiplayer lobbies.
+This is the KeeperFX masterserver that handles a list of online multiplayer lobbies.
 
 It's a simple plaintext TCP server that communicates using JSON data structures.
 It does not rely on a continuous open socket.
@@ -18,10 +18,12 @@ When a lobby is created the client receives a lobby token that can be used to up
 
 ## Setup
 ```
-git clone https://github.com/yani/keeperfx-masterserver
+git clone https://github.com/dkfans/keeperfx-masterserver
 cd keeperfx-masterserver
 composer install
 ```
+
+To daemonize the server on a VPS you can use the [example systemd service script](docs/keeperfx-masterserver.service) 
 
 
 
