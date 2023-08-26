@@ -15,15 +15,7 @@ class LobbyList {
         $return = [];
 
         foreach(self::$lobbies as $lobby_id => $lobby) {
-            $return[] = [
-                'name'         => (string) $lobby->name,
-                'ip'           => (string) $lobby->ip,
-                'port'         => (int)    $lobby->port,
-                'players'      => (array)  $lobby->players,
-                'status'       => (string) $lobby->status->value,
-                'has_password' => (bool)   $lobby->has_password,
-                'game_version' => (string) $lobby->game_version,
-            ];
+            $return[] = $lobby->toPublicArray();
         }
 
         return $return;
@@ -71,7 +63,7 @@ class LobbyList {
 
         // Loop trough active lobbies
         foreach(self::$lobbies as $token => $lobby){
-    
+
             // Calculate difference
             $lobby_heartbeat_timestamp = $lobby->timestamp->getTimestamp();
             $timestamp_difference      = $current_timestamp - $lobby_heartbeat_timestamp;
