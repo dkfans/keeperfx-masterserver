@@ -21,4 +21,16 @@ class Lobby {
         $this->token     = LobbyList::generateUniqueLobbyToken();
     }
 
+    public function toPublicArray()
+    {
+		return [
+            'name'         => (string) $lobby->name,
+            'ip'           => (string) $lobby->ip,
+            'port'         => (int)    $lobby->port,
+            'players'      => (array)  $lobby->players,
+            'status'       => (string) $lobby->status->value,
+            'has_password' => (bool)   $lobby->has_password,
+            'game_version' => (string) $lobby->game_version,
+        ];
+    }
 }
