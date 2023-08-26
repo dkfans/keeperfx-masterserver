@@ -23,6 +23,8 @@ cd keeperfx-masterserver
 composer install
 ```
 
+To daemonize the server on a VPS you can use the [example systemd service script](docs/keeperfx-masterserver.service) 
+
 
 
 ## Usage

@@ -1,0 +1,14 @@
+[Unit]
+Description=KeeperFX Masterserver
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=keeperfx
+ExecStart=/usr/bin/php /var/www/keeperfx/masterserver/server.php 0.0.0.0 5566
+
+[Install]
+WantedBy=multi-user.target
